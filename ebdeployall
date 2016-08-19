@@ -33,6 +33,11 @@ if(count($argv)>0 && in_array('--run', $argv)){
 echoLine('Getting List of enviroments ...');
 exec('eb list',$envs);
 $count = count($envs);
+if(preg_match('/^(ERROR|WARN)/',$envs[0])){
+	echo implode("\n", $envs) . "\n";
+	echoLine("{{Doesn't look like enviroments are set up}}",'red');
+	exit;
+}
 echoLine("Recieved {{{$count}}} Enviroments",'green');
 foreach ($envs as $i => $env) {
 	$n = $i+1;
