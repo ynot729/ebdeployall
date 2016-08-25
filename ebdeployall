@@ -1,26 +1,5 @@
 #!/usr/bin/php
 <?php
-define('EOL',"\n");
-echo EOL;
-global $colors;
-$colors =[
-	'black'			=> '0;30',
-	'dark_gray'		=> '1;30',
-	'blue'			=> '0;34',
-	'light_blue'	=> '1;34',
-	'green'			=> '0;32',
-	'light_green'	=> '1;32',
-	'cyan'			=> '0;36',
-	'light_cyan'	=> '1;36',
-	'red'			=> '0;31',
-	'light_red'		=> '1;31',
-	'purple'		=> '0;35',
-	'light_purple'	=> '1;35',
-	'brown'			=> '0;33',
-	'yellow'		=> '1;33',
-	'light_gray'	=> '0;37',
-	'white'			=> '1;37',
-];
 
 //simulate
 $sim = true;
@@ -33,6 +12,10 @@ if(count($argv)>0 && in_array('--run', $argv)){
 echoLine('Getting List of enviroments ...');
 exec('eb list',$envs);
 $count = count($envs);
+if($count==0){
+	echoLine("{{ERROR:}} Could not retrieve list of enviroments",'red');
+	die();
+}
 if(preg_match('/^(ERROR|WARN)/',$envs[0])){
 	echo implode("\n", $envs) . "\n";
 	echoLine("{{Doesn't look like enviroments are set up}}",'red');
@@ -71,9 +54,26 @@ echoLine('{{Nothing actually happened, see SIMULATION notice above}}','red');
 
 function echoLine($msg, $color=false){
 	if($color){
-		global $colors;
+		$colors =[
+			'black'			=> '0;30',
+			'dark_gray'		=> '1;30',
+			'blue'			=> '0;34',
+			'light_blue'	=> '1;34',
+			'green'			=> '0;32',
+			'light_green'	=> '1;32',
+			'cyan'			=> '0;36',
+			'light_cyan'	=> '1;36',
+			'red'			=> '0;31',
+			'light_red'		=> '1;31',
+			'purple'		=> '0;35',
+			'light_purple'	=> '1;35',
+			'brown'			=> '0;33',
+			'yellow'		=> '1;33',
+			'light_gray'	=> '0;37',
+			'white'			=> '1;37',
+		];
 		$msg = preg_replace('/(\{\{)([^\}]+)(\}\})/', "\033[{$colors[$color]}m$2\033[0m", $msg);
 	}
-	echo $msg . EOL;
+	echo $msg . "\n";
 }
 ?>
