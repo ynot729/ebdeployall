@@ -1,56 +1,74 @@
 #!/usr/bin/php
 <?php
 
-//simulate
-$sim = true;
-if(count($argv)>0 && in_array('--run', $argv)){
-	$sim=false;
-}else{
-	echoLine('This is a {{SIMULATION}} please run flag {{--run}} for the real deal','yellow');
-}
-
-echoLine('Getting List of enviroments ...');
-exec('eb list',$envs);
-$count = count($envs);
-if($count==0){
-	echoLine("{{ERROR:}} Could not retrieve list of enviroments",'red');
-	die();
-}
-if(preg_match('/^(ERROR|WARN)/',$envs[0])){
-	echo implode("\n", $envs) . "\n";
-	echoLine("{{Doesn't look like enviroments are set up}}",'red');
-	exit;
-}
-echoLine("Recieved {{{$count}}} Enviroments",'green');
-foreach ($envs as $i => $env) {
-	$n = $i+1;
-	echoLine( "\t{$n})\t{$env}");
-}
-
-foreach ($envs as $i => $env) {
-	$n = $i+1;
-	if($i>0){
-		//not first
-		echoLine("Deploying To {{#{$n}}} -> {{{$env}}}", 'green');
-		if(!$sim){
-			passthru("eb deploy {$env} --verbose --nohang");
-		}
+try{
+	//simulate
+	$sim = true;
+	if(count($argv)>0 && in_array('--run', $argv)){
+		$sim=false;
 	}else{
-		//first one
-		echoLine("Deploying To {{{$env}}} for first time", 'green');
-		if(!$sim){
-			passthru("eb deploy {$env} --verbose");
-		}
+		echoLine('This is a {{SIMULATION}} please run flag {{--run}} for the real deal','yellow');
+	}
 
-		if(count($envs)>1){
-			echoLine("\nDone with {$env} will quietly deploy others");
+	echoLine('Getting default enviroment information');
+	exec('eb status',$resp);
+
+	$stats = respToStats($resp);
+
+
+	$deployed_version = $stats['Deployed Version'];
+
+	if(empty($deployed_version)){
+		throw new Exception("{{Could not determine deployed version}}");
+	}
+
+	echoLine("Deployed Application Version `{{{$deployed_version}}}`", 'green');
+
+
+	echoLine('Getting List of enviroments ...');
+	exec('eb list',$envs);
+	$count = count($envs);
+	if($count==0){
+		throw new Exception("{{ERROR:}} Could not retrieve list of enviroments");
+	}
+	if(preg_match('/^(ERROR|WARN)/',$envs[0])){
+		echo implode("\n", $envs) . "\n";
+		throw new Exception("{{Doesn't look like enviroments are set up}}");
+	}
+	echoLine("Recieved {{{$count}}} Enviroments",'green');
+	foreach ($envs as $i => $env) {
+		$n = $i+1;
+		echoLine( "\t{$n})\t{$env}");
+	}
+
+	// throw new Exception("{{STOPED}}");
+
+	foreach ($envs as $i => $env) {
+		if(preg_match('/\*/',$env)){
+			echoLine("Skipping default enviroment {{{$env}}}", 'yellow');
+			continue;
+		}
+		exec("eb status $env",$resp);;
+		$this_stats = respToStats($resp);
+		if($this_stats['Deployed Version'] == $deployed_version){
+			echoLine("Enviroment {{{$env}}} alread up to date",'yellow');
+		}else{
+			if(!$sim){
+				echoLine("Simulating deployment To {{#{$n}}} -> {{{$env}}}", 'yellow');
+			}else{
+				echoLine("Deploying To {{#{$n}}} -> {{{$env}}}", 'green');
+				passthru("eb deploy {$env} --version {$deployed_version} --nohang");
+			}
 		}
 	}
-	$percent = round (($n*100)/$count,2);
-	echoLine("\n{{{$percent} %}} Deployed \n",'yellow');
-}
 
-echoLine('{{Nothing actually happened, see SIMULATION notice above}}','red');
+	// echoLine('{{Nothing actually happened, see SIMULATION notice above}}','red');
+
+}
+catch(Exception $e){
+	echoLine($e->getMessage(),'red');
+	exit;
+}
 
 function echoLine($msg, $color=false){
 	if($color){
@@ -76,4 +94,13 @@ function echoLine($msg, $color=false){
 	}
 	echo $msg . "\n";
 }
-?>
+
+function respToStats($resp){
+	$result = [];
+	foreach ($resp as $i => $line) {
+		if(preg_match('/^([^\:]*)\:(.*)$/',$line,$match)){
+			$result[trim($match[1])] = trim($match[2]);
+		}
+	}
+	return $result;
+}
