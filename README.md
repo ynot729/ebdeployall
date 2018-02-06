@@ -1,5 +1,5 @@
 # ebdeployall
-A small command line script to deploy to multiple AWS Elastic Beanstalk enviroments
+A small command line script to deploy to multiple AWS Elastic Beanstalk environments. If you have multiple environments on the same application and you want to update them all a once without you will find this tool helpful.
 
 ### Requirements
 You will need AWSCLI which requires python and the script is written in PHP so you will need that as well
@@ -12,4 +12,4 @@ You will need AWSCLI which requires python and the script is written in PHP so y
       `ln -s /path/to/downloaded/edeployall /usr/local/bin/or/similar/ebdeployall`
 
 ### Usage
-After you do your eb init and your project is set up for `eb deploy` you can use `ebdeployall` and it will read all the enviroments on the application and deploy the default application version to all of them. It will do a dry run if the flag `--run` is not set which I recommend not using until everything looks good from the dry run.
+After you do your eb init and your project is set up for `eb deploy` you can use `ebdeployall` and it will read all the environments on the application and deploy the default application version to all of them. It will do a dry run if the flag `--run` is not set which I recommend not using until everything looks good from the dry run.
