@@ -53,7 +53,7 @@ try{
 		if($this_stats['Deployed Version'] == $deployed_version){
 			echoLine("Enviroment {{{$env}}} alread up to date",'yellow');
 		}else{
-			if(!$sim){
+			if($sim){
 				echoLine("Simulating deployment To {{#{$n}}} -> {{{$env}}}", 'yellow');
 			}else{
 				echoLine("Deploying To {{#{$n}}} -> {{{$env}}}", 'green');
