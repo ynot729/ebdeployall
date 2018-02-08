@@ -54,9 +54,9 @@ try{
 			echoLine("Enviroment {{{$env}}} alread up to date",'yellow');
 		}else{
 			if($sim){
-				echoLine("Simulating deployment To {{#{$n}}} -> {{{$env}}}", 'yellow');
+				echoLine("Simulating deployment To {{#{$i}}} -> {{{$env}}}", 'yellow');
 			}else{
-				echoLine("Deploying To {{#{$n}}} -> {{{$env}}}", 'green');
+				echoLine("Deploying To {{#{$i}}} -> {{{$env}}}", 'green');
 				passthru("eb deploy {$env} --version {$deployed_version} --nohang");
 			}
 		}
