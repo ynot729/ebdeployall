@@ -2,6 +2,22 @@
 <?php
 
 try{
+	if(in_array('swap', $argv)){
+		$swap_to = array_search('swap',$argv);
+		$swap_to = $argv[$swap_to+1];
+		$from_path = "./.elasticbeanstalk/config-$swap_to.yml";
+		if(!is_file($from_path)){throw new Exception("file: $from_path {{not found}}");}
+		$current_config_path = "./.elasticbeanstalk/config.yml";
+		if(!is_file($current_config_path)) throw new Exception("{{current configuration file not found}}");
+		$current_config = file_get_contents($current_config_path);
+		if(!preg_match('/(environment)\s*\:\s*(\S+)/mi',$current_config,$match)){throw new Exception("Could not determine enviroment for `$current_config_path`");}
+		$current_config_name = $match[2];
+		if(!rename($current_config_path,"./.elasticbeanstalk/config-$current_config_name.yml")) throw new Exception("Could not name current configuration `{{{$current_config_name}}}`");
+		if(!rename($from_path,"./.elasticbeanstalk/config.yml")) throw new Exception("{{Error Renaming `$swap_to`}}");
+		// echoLine("old path: $from_path");
+		die("Swap Done!\n");
+	}
+
 	//simulate
 	$sim = true;
 	if(count($argv)>0 && in_array('--run', $argv)){
