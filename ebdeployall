@@ -64,7 +64,7 @@ try{
 			echoLine("Skipping default enviroment {{{$env}}}", 'yellow');
 			continue;
 		}
-		exec("eb status $env",$resp);;
+		exec("eb status $env",$resp);
 		$this_stats = respToStats($resp);
 		if($this_stats['Deployed Version'] == $deployed_version){
 			echoLine("Enviroment {{{$env}}} alread up to date",'yellow');
